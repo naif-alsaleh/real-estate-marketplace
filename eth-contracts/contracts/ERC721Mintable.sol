@@ -27,7 +27,7 @@ contract Ownable {
     }
 
     //  4) fill out the transferOwnership function
-    function transferOwnership(address newOwner) public onlyOwner {
+    function transferOwnership(address newOwner) external onlyOwner {
         // TODO add functionality to transfer control of the contract to a newOwner.
         // make sure the new owner is a real address
         _owner = newOwner;
@@ -40,12 +40,47 @@ contract Ownable {
     );
 }
 
-//  TODO's: Create a Pausable contract that inherits from the Ownable contract
-//  1) create a private '_paused' variable of type bool
-//  2) create a public setter using the inherited onlyOwner modifier 
-//  3) create an internal constructor that sets the _paused variable to false
-//  4) create 'whenNotPaused' & 'paused' modifier that throws in the appropriate situation
-//  5) create a Paused & Unpaused event that emits the address that triggered the event
+contract Pausable is Ownable {
+    //  TODO's: Create a Pausable contract that inherits from the Ownable contract
+    //  1) create a private '_paused' variable of type bool
+    bool private _paused;
+
+    //  2) create a public setter using the inherited onlyOwner modifier 
+    function getPaused() external view onlyOwner returns(bool) {
+        emit Paused(msg.sender);
+        return _paused;
+    }
+
+    function setPaused(bool newValue) external onlyOwner {
+        emit Unpaused(msg.sender);
+        _paused = newValue;
+    }
+
+    //  3) create an internal constructor that sets the _paused variable to false
+    constructor() {
+        _paused = false;
+    }
+
+    //  4) create 'whenNotPaused' & 'paused' modifier that throws in the appropriate situation
+    modifier whenNotPaused() {
+        require(!_paused, "This functionality is paused");
+        _;
+    }
+
+    modifier paused() {
+        require(_paused, "This functionality can be used only if contract is paused");
+        _;
+    }
+
+    //  5) create a Paused & Unpaused event that emits the address that triggered the event
+    event Paused(
+        address issuer
+    );
+
+    event Unpaused(
+        address issuer
+    );
+}
 
 contract ERC165 {
     bytes4 private constant _INTERFACE_ID_ERC165 = 0x01ffc9a7;
