@@ -11,12 +11,12 @@ contract Ownable {
     //  1) create a private '_owner' variable of type address with a public getter function
     address private _owner;
 
-    function getOwner() external view returns(address) {
+    function getOwner() public view returns(address) {
         return _owner;
     }
 
     //  2) create an internal constructor that sets the _owner var to the creater of the contract
-    constructor() {
+    constructor() internal {
         _owner = msg.sender;
     }
 
@@ -48,17 +48,20 @@ contract Pausable is Ownable {
 
     //  2) create a public setter using the inherited onlyOwner modifier 
     function getPaused() external view onlyOwner returns(bool) {
-        emit Paused(msg.sender);
         return _paused;
     }
 
     function setPaused(bool newValue) external onlyOwner {
-        emit Unpaused(msg.sender);
         _paused = newValue;
+        if(newValue) {
+            emit Paused(msg.sender);
+        } else {
+            emit Unpaused(msg.sender);
+        }
     }
 
     //  3) create an internal constructor that sets the _paused variable to false
-    constructor() {
+    constructor() internal {
         _paused = false;
     }
 
@@ -492,8 +495,12 @@ contract ERC721Enumerable is ERC165, ERC721 {
 contract ERC721Metadata is ERC721Enumerable, usingOraclize {
     
     // TODO: Create private vars for token _name, _symbol, and _baseTokenURI (string)
+    string private _name;
+    string private _symbol;
+    string private _baseTokenURI;
 
     // TODO: create private mapping of tokenId's to token uri's called '_tokenURIs'
+    mapping(uint256 => string) private _tokenURIs;
 
     bytes4 private constant _INTERFACE_ID_ERC721_METADATA = 0x5b5e139f;
     /*
@@ -506,11 +513,25 @@ contract ERC721Metadata is ERC721Enumerable, usingOraclize {
 
     constructor (string memory name, string memory symbol, string memory baseTokenURI) public {
         // TODO: set instance var values
+        _name = name;
+        _symbol = symbol;
+        _baseTokenURI = baseTokenURI;
 
         _registerInterface(_INTERFACE_ID_ERC721_METADATA);
     }
 
     // TODO: create external getter functions for name, symbol, and baseTokenURI
+    function getName() external view returns(string memory) {
+        return _name;
+    }
+
+    function getSymbol() external view returns(string memory) {
+        return _symbol;
+    }
+
+    function getBaseTokenURI() external view returns(string memory) {
+        return _symbol;
+    }
 
     function tokenURI(uint256 tokenId) external view returns (string memory) {
         require(_exists(tokenId));
@@ -524,6 +545,11 @@ contract ERC721Metadata is ERC721Enumerable, usingOraclize {
     // TIP #2: you can also use uint2str() to convert a uint to a string
         // see https://github.com/oraclize/ethereum-api/blob/master/oraclizeAPI_0.5.sol for strConcat()
     // require the token exists before setting
+    function _setTokenURI(uint256 tokenId) internal {
+        require(_exists(tokenId), "This Token does not exist");
+        string memory concatenatedTokenURI = strConcat(_baseTokenURI, uint2str(tokenId));
+        _tokenURIs[tokenId] = concatenatedTokenURI;
+    }
 
 }
 
