@@ -1,7 +1,7 @@
 pragma solidity >=0.4.21 <0.6.0;
 
 // TODO define a contract call to the zokrates generated solidity contract <Verifier> or <renamedVerifier>
-
+contract SolnSquareVerifier {
 
 
 // TODO define another contract named SolnSquareVerifier that inherits from your ERC721Mintable class
@@ -29,7 +29,7 @@ pragma solidity >=0.4.21 <0.6.0;
 // TODO Create a function to mint new NFT only after the solution has been verified
 //  - make sure the solution is unique (has not been used before)
 //  - make sure you handle metadata as well as tokenSuplly
-
+}
   
 
 
