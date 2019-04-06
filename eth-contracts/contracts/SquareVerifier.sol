@@ -1,6 +1,6 @@
 // This file is LGPL3 Licensed
 
-pragma solidity ^0.5.0;
+pragma solidity >=0.4.19 <0.6.0;
 
 /**
  * @title Elliptic curve operations on twist points for alt_bn128
@@ -258,7 +258,7 @@ library BN256G2 {
         uint256 pt1zx, uint256 pt1zy,
         uint256 pt2xx, uint256 pt2xy,
         uint256 pt2yx, uint256 pt2yy,
-        uint256 pt2zx, uint256 pt2zy) internal pure returns (uint256[6] pt3) {
+        uint256 pt2zx, uint256 pt2zy) internal pure returns (uint256[6] memory pt3) {
             if (pt1zx == 0 && pt1zy == 0) {
                 (
                     pt3[PTXX], pt3[PTXY],
@@ -269,7 +269,6 @@ library BN256G2 {
                     pt2yx, pt2yy,
                     pt2zx, pt2zy
                 );
-                return;
             } else if (pt2zx == 0 && pt2zy == 0) {
                 (
                     pt3[PTXX], pt3[PTXY],
@@ -280,7 +279,6 @@ library BN256G2 {
                     pt1yx, pt1yy,
                     pt1zx, pt1zy
                 );
-                return;
             }
 
             (pt2yx,     pt2yy)     = _FQ2Mul(pt2yx, pt2yy, pt1zx, pt1zy); // U1 = y2 * z1
@@ -295,7 +293,6 @@ library BN256G2 {
                         pt3[PTYX], pt3[PTYY],
                         pt3[PTZX], pt3[PTZY]
                     ) = _ECTwistDoubleJacobian(pt1xx, pt1xy, pt1yx, pt1yy, pt1zx, pt1zy);
-                    return;
                 }
                 (
                     pt3[PTXX], pt3[PTXY],
@@ -306,7 +303,6 @@ library BN256G2 {
                     1, 0,
                     0, 0
                 );
-                return;
             }
 
             (pt2zx,     pt2zy)     = _FQ2Mul(pt1zx, pt1zy, pt2zx,     pt2zy);     // W = z1 * z2
@@ -364,7 +360,7 @@ library BN256G2 {
         uint256 pt1xx, uint256 pt1xy,
         uint256 pt1yx, uint256 pt1yy,
         uint256 pt1zx, uint256 pt1zy
-    ) internal pure returns(uint256[6] pt2) {
+    ) internal pure returns(uint256[6] memory pt2) {
         while (d != 0) {
             if ((d & 1) != 0) {
                 pt2 = _ECTwistAddJacobian(
@@ -397,7 +393,7 @@ library BN256G2 {
 // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-pragma solidity ^0.5.0;
+pragma solidity >=0.4.19 <0.6.0;
 library Pairing {
     struct G1Point {
         uint X;
@@ -409,11 +405,11 @@ library Pairing {
         uint[2] Y;
     }
     /// @return the generator of G1
-    function P1() pure internal returns (G1Point) {
+    function P1() pure internal returns (G1Point memory) {
         return G1Point(1, 2);
     }
     /// @return the generator of G2
-    function P2() pure internal returns (G2Point) {
+    function P2() pure internal returns (G2Point memory) {
         return G2Point(
             [11559732032986387107991004021392285783925812861821192530917403151452391805634,
              10857046999023057135944570762232829481370756359578518086990519993285655852781],
@@ -422,7 +418,7 @@ library Pairing {
         );
     }
     /// @return the negation of p, i.e. p.addition(p.negate()) should be zero.
-    function negate(G1Point p) pure internal returns (G1Point) {
+    function negate(G1Point memory p) pure internal returns (G1Point memory) {
         // The prime q in the base field F_q for G1
         uint q = 21888242871839275222246405745257275088696311157297823662689037894645226208583;
         if (p.X == 0 && p.Y == 0)
@@ -430,7 +426,7 @@ library Pairing {
         return G1Point(p.X, q - (p.Y % q));
     }
     /// @return the sum of two points of G1
-    function addition(G1Point p1, G1Point p2) internal returns (G1Point r) {
+    function addition(G1Point memory p1, G1Point memory p2) internal returns (G1Point memory r) {
         uint[4] memory input;
         input[0] = p1.X;
         input[1] = p1.Y;
@@ -445,12 +441,12 @@ library Pairing {
         require(success);
     }
     /// @return the sum of two points of G2
-    function addition(G2Point p1, G2Point p2) internal pure returns (G2Point r) {
+    function addition(G2Point memory p1, G2Point memory p2) internal pure returns (G2Point memory r) {
         (r.X[1], r.X[0], r.Y[1], r.Y[0]) = BN256G2.ECTwistAdd(p1.X[1],p1.X[0],p1.Y[1],p1.Y[0],p2.X[1],p2.X[0],p2.Y[1],p2.Y[0]);
     }
     /// @return the product of a point on G1 and a scalar, i.e.
     /// p == p.scalar_mul(1) and p.addition(p) == p.scalar_mul(2) for all points p.
-    function scalar_mul(G1Point p, uint s) internal returns (G1Point r) {
+    function scalar_mul(G1Point memory p, uint s) internal returns (G1Point memory r) {
         uint[3] memory input;
         input[0] = p.X;
         input[1] = p.Y;
@@ -467,7 +463,7 @@ library Pairing {
     /// e(p1[0], p2[0]) *  .... * e(p1[n], p2[n]) == 1
     /// For example pairing([P1(), P1().negate()], [P2(), P2()]) should
     /// return true.
-    function pairing(G1Point[] p1, G2Point[] p2) internal returns (bool) {
+    function pairing(G1Point[] memory p1, G2Point[] memory p2) internal returns (bool) {
         require(p1.length == p2.length);
         uint elements = p1.length;
         uint inputSize = elements * 6;
@@ -492,7 +488,7 @@ library Pairing {
         return out[0] != 0;
     }
     /// Convenience method for a pairing check for two pairs.
-    function pairingProd2(G1Point a1, G2Point a2, G1Point b1, G2Point b2) internal returns (bool) {
+    function pairingProd2(G1Point memory a1, G2Point memory a2, G1Point memory b1, G2Point memory b2) internal returns (bool) {
         G1Point[] memory p1 = new G1Point[](2);
         G2Point[] memory p2 = new G2Point[](2);
         p1[0] = a1;
@@ -503,9 +499,9 @@ library Pairing {
     }
     /// Convenience method for a pairing check for three pairs.
     function pairingProd3(
-            G1Point a1, G2Point a2,
-            G1Point b1, G2Point b2,
-            G1Point c1, G2Point c2
+            G1Point memory a1, G2Point memory a2,
+            G1Point memory b1, G2Point memory b2,
+            G1Point memory c1, G2Point memory c2
     ) internal returns (bool) {
         G1Point[] memory p1 = new G1Point[](3);
         G2Point[] memory p2 = new G2Point[](3);
@@ -519,10 +515,10 @@ library Pairing {
     }
     /// Convenience method for a pairing check for four pairs.
     function pairingProd4(
-            G1Point a1, G2Point a2,
-            G1Point b1, G2Point b2,
-            G1Point c1, G2Point c2,
-            G1Point d1, G2Point d2
+            G1Point memory a1, G2Point memory a2,
+            G1Point memory b1, G2Point memory b2,
+            G1Point memory c1, G2Point memory c2,
+            G1Point memory d1, G2Point memory d2
     ) internal returns (bool) {
         G1Point[] memory p1 = new G1Point[](4);
         G2Point[] memory p2 = new G2Point[](4);
@@ -559,7 +555,7 @@ contract Verifier {
         Pairing.G1Point K;
         Pairing.G1Point H;
     }
-    function verifyingKey() pure internal returns (VerifyingKey vk) {
+    function verifyingKey() pure internal returns (VerifyingKey memory vk) {
         vk.A = Pairing.G2Point([0x7baa70cb15a756d9f95129af1570c6eaf2af1ca2a9c358af861ebfaf2e87d07, 0x16de8a7eabc917e70c7d6223bafeceb08d183bbf5f3ef156456cbd33e603fcc7], [0xae46ad7542646428303b3ec5a400ba380154294ce7e36ae84bb15e7efecae3b, 0x98ef4114876cabe3d849b960a8f1a26f46f93c205f41ffb85c2578f7c242c93]);
         vk.B = Pairing.G1Point(0x2b3aab759f80bfb762b3f9398cfbf3ac4b90188ff2deb766fb09200d6af48e55, 0x1b5b35d6e9ce39cabe0b447aaa189cbf90c614e358d0f3e372a04e52e970941e);
         vk.C = Pairing.G2Point([0x8c726382b45627aeafdcde56bbce0f471f42e53cf3a58feea5c1619a0a8a532, 0x2db07d23e2d955d303e00ed118dc7ce8dd17f65f5a6075407ea3e5d18b71030d], [0x65dbcc34f1d368965c70a696f63cba270d9ed633fffab422be910789e17de93, 0xe9015df82ec9df2f0cd374516dd2f23e58b96abe7fe99b665fa06e596b37c3d]);
@@ -572,7 +568,7 @@ contract Verifier {
         vk.IC[1] = Pairing.G1Point(0x96df11e9dfdc4709d8c22bbbcbe3d7158ac5bf4f4162586108c53377f7d27e1, 0xd0195d37e2f7298d73c46bc54e0db86ee11cc4deb44bb3f833fd4012efdb5f8);
         vk.IC[2] = Pairing.G1Point(0x26769c8d7fbff0f64fbb6e64835584aa8c1fe873518f01e83fe75b0f6401f560, 0x74a4cb172fef0d5ea0de883441f28c93d8bd6cfac393235890475ed674a94d7);
     }
-    function verify(uint[] input, Proof proof) internal returns (uint) {
+    function verify(uint[] memory input, Proof memory proof) internal returns (uint) {
         VerifyingKey memory vk = verifyingKey();
         require(input.length + 1 == vk.IC.length);
         // Compute the linear combination vk_x
@@ -597,15 +593,15 @@ contract Verifier {
     }
     event Verified(string s);
     function verifyTx(
-            uint[2] a,
-            uint[2] a_p,
-            uint[2][2] b,
-            uint[2] b_p,
-            uint[2] c,
-            uint[2] c_p,
-            uint[2] h,
-            uint[2] k,
-            uint[2] input
+            uint[2] memory a,
+            uint[2] memory a_p,
+            uint[2][2] memory b,
+            uint[2] memory b_p,
+            uint[2] memory c,
+            uint[2] memory c_p,
+            uint[2] memory h,
+            uint[2] memory k,
+            uint[2] memory input
         ) public returns (bool r) {
         Proof memory proof;
         proof.A = Pairing.G1Point(a[0], a[1]);
