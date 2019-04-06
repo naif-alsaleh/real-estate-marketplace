@@ -533,7 +533,7 @@ library Pairing {
         return pairing(p1, p2);
     }
 }
-contract Verifier {
+contract SquareVerifier {
     using Pairing for *;
     struct VerifyingKey {
         Pairing.G2Point A;
