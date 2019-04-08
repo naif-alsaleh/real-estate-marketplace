@@ -15,6 +15,7 @@ contract('SquareVerifier', function(accounts) {
         "H": ["0x232d79b2ed9de53f74cd3d32ee0594129cfcfd151941d9a628d932a449f18c18", "0x12bc9ebeee7c3a1554a7637b592d50d4e95e7ed505776b8602f5611615b0a993"],
         "K": ["0xbe079c7449c6fbe156f127e274770548e5f13c11b31d62e4ab380563e6362b8", "0x1cf1ce5b372cee75d832fc47531f5de10ab51503a87c5fc21af9ac11037b3387"]
     }
+    let input = [3, 9]
 
     beforeEach(async function () {
         this.contract = await SquareVerifier.new();
@@ -32,10 +33,28 @@ contract('SquareVerifier', function(accounts) {
             proof.C_p,
             proof.H,
             proof.K,
-            [3, 9]
+            input
         );
+    })
+
+    // Test verification with incorrect proof
+    it('should reject incorrect proof', async function() {
+        try{
+            await this.contract.verifyTx(
+                proof.B[0],
+                proof.A_p,
+                proof.B,
+                proof.B_p,
+                proof.C,
+                proof.C_p,
+                proof.H,
+                proof.K,
+                input
+            )
+        } catch(e) {
+                assert.strictEqual(e.message, "Returned error: VM Exception while processing transaction: invalid opcode");
+            }
     })
 })
 
 
-// Test verification with incorrect proof
