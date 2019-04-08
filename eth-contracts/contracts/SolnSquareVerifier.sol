@@ -60,7 +60,7 @@ contract SolnSquareVerifier is ERC721Mintable {
         require(!uniqueSolutions[input[0]][input[1]], "This proof has been submitted before");
         
         bool result = verifier.verifyTx(a, a_p, b, b_p, c, c_p, h, k, input);
-        require(result, "you have provide an incorrect proof");
+        require(!result, "you have provide an incorrect proof");
 
         super._mint(to, tokenId);
         super._setTokenURI(tokenId);
