@@ -7,10 +7,10 @@ import "./SquareVerifier.sol";
 // TODO define another contract named SolnSquareVerifier that inherits from your ERC721Mintable class
 contract SolnSquareVerifier is ERC721Mintable {
 
-    SquareVerifier private verifier;
+    SquareVerifier private _verifier;
 
     constructor() public {
-        verifier = new SquareVerifier();
+        _verifier = new SquareVerifier();
     }
 
     // TODO define a solutions struct that can hold an index & an address
@@ -20,11 +20,11 @@ contract SolnSquareVerifier is ERC721Mintable {
     }
 
     // TODO define an array of the above struct
-    Solution[] private solutions;
-    uint private solutionCount = 0;
+    Solution[] private _solutions;
+    uint private _solutionCount = 0;
 
     // TODO define a mapping to store unique solutions submitted
-    mapping(uint => mapping(uint => bool)) private uniqueSolutions;
+    mapping(bytes32 => bool) private _uniqueSolutions;
 
     // TODO Create an event to emit when a solution is added
     event SolutionAdded(
@@ -34,11 +34,30 @@ contract SolnSquareVerifier is ERC721Mintable {
 
     // TODO Create a function to add the solutions to the array and emit the event
     function _addSolution(uint first, uint second) internal {
-        solutions.push(Solution({
-            index: solutionCount++,
+        _solutions.push(Solution({
+            index: _solutionCount++,
             addr: msg.sender
         }));
         emit SolutionAdded(first, second);
+    }
+
+    function _hashSolution(
+        uint[2] memory a,
+        uint[2] memory a_p,
+        uint[2][2] memory b,
+        uint[2] memory b_p,
+        uint[2] memory c,
+        uint[2] memory c_p,
+        uint[2] memory h,
+        uint[2] memory k,
+        uint[2] memory input
+    ) internal pure returns(bytes32) {
+        return keccak256(abi.encodePacked(
+            a, a_p,
+            b, b_p,
+            c, c_p,
+            h, k, input    
+        ));
     }
 
     // TODO Create a function to mint new NFT only after the solution has been verified
@@ -57,15 +76,17 @@ contract SolnSquareVerifier is ERC721Mintable {
         address to, 
         uint256 tokenId
     ) external onlyOwner() returns(bool) {
-        require(!uniqueSolutions[input[0]][input[1]], "This proof has been submitted before");
+        bytes32 solutionHash = _hashSolution(a, a_p, b, b_p, c, c_p, h, k, input);
         
-        bool result = verifier.verifyTx(a, a_p, b, b_p, c, c_p, h, k, input);
+        require(!_uniqueSolutions[solutionHash], "This proof has been submitted before");
+        
+        bool result = _verifier.verifyTx(a, a_p, b, b_p, c, c_p, h, k, input);
         require(!result, "you have provide an incorrect proof");
 
         super._mint(to, tokenId);
         super._setTokenURI(tokenId);
 
-        uniqueSolutions[input[0]][input[1]] = true;
+        _uniqueSolutions[solutionHash] = true;
         _addSolution(input[0], input[1]);
         return true;
     }
