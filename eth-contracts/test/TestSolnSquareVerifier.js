@@ -48,6 +48,26 @@ contract('SolnSquareVerifier', accounts => {
             assert.equal(account_two, owner, "The owner of the token has not been registered proberly"); 
         })
 
+        it('should not mint a token if the proof is incorrect', async function () { 
+            try{
+                await this.contract.mint(
+                    42,
+                    proof.A_p,
+                    proof.B,
+                    proof.B_p,
+                    proof.C,
+                    proof.C_p,
+                    proof.H,
+                    proof.K,
+                    input,
+                    account_two,
+                    "101"
+                )
+            } catch(e) {
+                assert.strictEqual(e.message, 'expected array value (arg="a", coderType="array", value=42)');
+            }
+        })
+
     });
 
 })

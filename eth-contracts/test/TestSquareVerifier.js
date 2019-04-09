@@ -53,7 +53,7 @@ contract('SquareVerifier', function(accounts) {
             )
         } catch(e) {
                 assert.strictEqual(e.message, "Returned error: VM Exception while processing transaction: invalid opcode");
-            }
+        }
     })
 })
 
