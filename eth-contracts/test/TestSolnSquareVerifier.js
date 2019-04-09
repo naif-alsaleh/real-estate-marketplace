@@ -68,6 +68,39 @@ contract('SolnSquareVerifier', accounts => {
             }
         })
 
+        it('should not mint a token if the proof has been submited before', async function () { 
+            try{
+                await this.contract.mint(
+                    proof.A,
+                    proof.A_p,
+                    proof.B,
+                    proof.B_p,
+                    proof.C,
+                    proof.C_p,
+                    proof.H,
+                    proof.K,
+                    input,
+                    account_two,
+                    "101"
+                )
+                await this.contract.mint(
+                    proof.A,
+                    proof.A_p,
+                    proof.B,
+                    proof.B_p,
+                    proof.C,
+                    proof.C_p,
+                    proof.H,
+                    proof.K,
+                    input,
+                    account_two,
+                    "101"
+                )
+            } catch(e) {
+                assert.strictEqual(e.message, 'Returned error: VM Exception while processing transaction: revert This proof has been submitted before -- Reason given: This proof has been submitted before.');
+            }
+        })
+
     });
 
 })
