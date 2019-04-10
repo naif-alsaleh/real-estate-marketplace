@@ -84,7 +84,6 @@ contract SolnSquareVerifier is ERC721Mintable {
         require(!result, "you have provide an incorrect proof");
 
         super._mint(to, tokenId);
-        super._setTokenURI(tokenId);
 
         _uniqueSolutions[solutionHash] = true;
         _addSolution(input[0], input[1]);
