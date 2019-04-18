@@ -65,7 +65,10 @@ contract('SolnSquareVerifier', accounts => {
                 )
             } catch(e) {
                 assert.strictEqual(e.message, 'expected array value (arg="a", coderType="array", value=42)');
+                return;
             }
+    
+            assert.fail("expected to throw an exception")
         })
 
         it('should not mint a token if the proof has been submited before', async function () { 

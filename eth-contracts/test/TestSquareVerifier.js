@@ -15,7 +15,7 @@ contract('SquareVerifier', function(accounts) {
         "H": ["0x232d79b2ed9de53f74cd3d32ee0594129cfcfd151941d9a628d932a449f18c18", "0x12bc9ebeee7c3a1554a7637b592d50d4e95e7ed505776b8602f5611615b0a993"],
         "K": ["0xbe079c7449c6fbe156f127e274770548e5f13c11b31d62e4ab380563e6362b8", "0x1cf1ce5b372cee75d832fc47531f5de10ab51503a87c5fc21af9ac11037b3387"]
     }
-    let input = [3, 9]
+    let input = [9, 1]
 
     beforeEach(async function () {
         this.contract = await SquareVerifier.new();
@@ -24,7 +24,7 @@ contract('SquareVerifier', function(accounts) {
     // Test verification with correct proof
     // - use the contents from proof.json generated from zokrates steps
     it('should verify correct proof', async function() {
-        await this.contract.verifyTx(
+        let result = await this.contract.verifyTx(
             proof.A,
             proof.A_p,
             proof.B,
@@ -35,6 +35,8 @@ contract('SquareVerifier', function(accounts) {
             proof.K,
             input
         );
+
+        assert.equal(result.logs[0].event, "Verified", "event was not emitted");
     })
 
     // Test verification with incorrect proof
@@ -53,7 +55,10 @@ contract('SquareVerifier', function(accounts) {
             )
         } catch(e) {
                 assert.strictEqual(e.message, "Returned error: VM Exception while processing transaction: invalid opcode");
+                return;
         }
+
+        assert.fail("expected to throw an exception")
     })
 })
 
